@@ -24,6 +24,7 @@
             overflow: hidden;
         }
 
+        /* 頂部導覽列 */
         .header {
             width: 100%;
             padding: 10px 20px;
@@ -36,53 +37,23 @@
             z-index: 10;
         }
 
-        .settings-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
-
-        /* 彈窗樣式 */
-        #settings-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            overflow-y: auto;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 500px;
-            margin: auto;
-        }
-
-        .input-group {
+        .header-btns {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            margin-bottom: 15px;
+            gap: 20px;
+            align-items: center;
         }
 
-        .input-group input {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-        }
-
-        .add-btn {
-            background: var(--primary-color);
-            color: white;
+        .icon-btn {
+            background: none;
             border: none;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
+            font-size: 24px;
             cursor: pointer;
+            padding: 5px;
+            transition: transform 0.1s;
         }
+        .icon-btn:active { transform: scale(0.9); }
 
-        /* 閃卡主區域 */
+        /* 主區域 */
         .main-container {
             flex: 1;
             display: flex;
@@ -94,7 +65,6 @@
             box-sizing: border-box;
         }
 
-        /* 控制字體大小的滑桿區 */
         .slider-container {
             width: 90%;
             max-width: 400px;
@@ -108,13 +78,11 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        input[type=range] { flex: 1; }
-
         .card-container {
             perspective: 1000px;
             width: 95%;
             max-width: 600px;
-            height: 60vh; /* 使用比例高度，確保大字有空間 */
+            height: 55vh;
             max-height: 500px;
             cursor: pointer;
         }
@@ -144,8 +112,8 @@
             padding: 20px;
             box-sizing: border-box;
             text-align: center;
-            overflow: hidden; /* 防止文字溢出 */
-            word-break: break-all; /* 強制換行 */
+            overflow: hidden;
+            word-break: break-all;
         }
 
         .card-front { background: var(--card-white); }
@@ -155,15 +123,17 @@
             border: 3px dashed var(--secondary-color);
         }
 
-        /* 文字動態調整 */
-        #word-display {
-            font-weight: 900;
-            color: #2c3e50;
-            width: 100%;
-        }
-
+        #word-display { font-weight: 900; color: #2c3e50; }
         #pinyin-display { color: var(--secondary-color); font-weight: bold; }
         #meaning-display { color: #7f8c8d; margin-top: 10px; }
+
+        /* 手動朗讀圖示 */
+        .manual-speak {
+            position: absolute;
+            bottom: 20px;
+            font-size: 20px;
+            color: #ddd;
+        }
 
         .btn-group { margin: 25px 0; }
         .btn {
@@ -176,18 +146,39 @@
             font-weight: bold;
             box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
         }
-        
-        .btn:active { transform: scale(0.95); }
 
-        .backup-section { margin-top: 20px; display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 15px; }
-        .backup-btn { flex: 1; padding: 10px; font-size: 12px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; }
+        /* 設定彈窗 */
+        #settings-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+        .input-group input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
+        .add-btn { background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div style="font-weight: bold; font-size: 1.2rem;">中文閃卡 Pro</div>
-        <button class="settings-btn" onclick="toggleModal()">⚙️</button>
+        <div class="header-btns">
+            <button id="voice-toggle" class="icon-btn" onclick="toggleVoice()" title="切換發音">🔊</button>
+            <button class="icon-btn" onclick="toggleModal()">⚙️</button>
+        </div>
     </div>
 
     <div class="main-container">
@@ -201,10 +192,12 @@
             <div class="card" id="card">
                 <div class="card-face card-front">
                     <div id="word-display">載入中...</div>
+                    <div class="manual-speak">🔊</div>
                 </div>
                 <div class="card-face card-back">
                     <div id="pinyin-display"></div>
                     <div id="meaning-display"></div>
+                    <div class="manual-speak">🔊</div>
                 </div>
             </div>
         </div>
@@ -223,35 +216,42 @@
                 <input type="text" id="new-meaning" placeholder="意義 (選填)">
                 <button class="add-btn" onclick="addVocab()">新增單字</button>
             </div>
-            
             <div id="vocab-list-container" style="max-height: 200px; overflow-y: auto; border-top: 1px solid #eee;"></div>
-
-            <div class="backup-section">
-                <button class="backup-btn" onclick="exportVocab()">📤 匯出備份</button>
-                <button class="backup-btn" onclick="document.getElementById('importFile').click()">📥 匯入清單</button>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button onclick="exportVocab()" style="flex:1; padding:10px; font-size:12px;">📤 匯出備份</button>
+                <button onclick="document.getElementById('importFile').click()" style="flex:1; padding:10px; font-size:12px;">📥 匯入清單</button>
                 <input type="file" id="importFile" style="display:none" accept=".json" onchange="importVocab(event)">
             </div>
-
             <button onclick="toggleModal()" style="width:100%; margin-top:20px; padding:12px; background:#34495e; color:white; border:none; border-radius:10px;">完成並關閉</button>
         </div>
     </div>
 
     <script>
-        const defaultVocab = [{kanji: "大家", pinyin: "dà jiā", meaning: "Everyone"}];
+        const defaultVocab = [{kanji: "靜音", pinyin: "jìng yīn", meaning: "Mute / Silent"}];
         let vocabulary = JSON.parse(localStorage.getItem('myVocab')) || defaultVocab;
         let currentIndex = -1;
+        let isVoiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // 預設開啟
         const synth = window.speechSynthesis;
 
-        function saveToLocal() {
-            localStorage.setItem('myVocab', JSON.stringify(vocabulary));
-            renderVocabList();
+        // 初始化開關圖示
+        document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "靜音模式 🔇";
+
+        function toggleVoice() {
+            isVoiceEnabled = !isVoiceEnabled;
+            localStorage.setItem('voiceEnabled', isVoiceEnabled);
+            document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "靜音模式 🔇";
+            // 切換時如果剛好有聲音，直接停止
+            if (!isVoiceEnabled) synth.cancel();
         }
 
-        function speak(text) {
+        function speak(text, force = false) {
+            // 如果沒開啟語音且不是「強制點擊發音」，則不執行
+            if (!isVoiceEnabled && !force) return;
+            
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'zh-TW';
-            utter.rate = 0.85; // 稍微慢一點更清晰
+            utter.rate = 0.85;
             synth.speak(utter);
         }
 
@@ -262,10 +262,7 @@
 
         function nextCard(event) {
             if(event) event.stopPropagation();
-            if(vocabulary.length === 0) {
-                document.getElementById('word-display').innerText = "請新增單字";
-                return;
-            }
+            if(vocabulary.length === 0) return;
             document.getElementById('card').classList.remove('is-flipped');
             setTimeout(() => {
                 currentIndex = Math.floor(Math.random() * vocabulary.length);
@@ -277,90 +274,60 @@
             }, 200);
         }
 
+        // --- 以下為管理功能邏輯 (同前版) ---
+        function saveToLocal() { localStorage.setItem('myVocab', JSON.stringify(vocabulary)); renderVocabList(); }
         function toggleModal() {
             const modal = document.getElementById('settings-modal');
             const isVisible = modal.style.display === 'block';
             modal.style.display = isVisible ? 'none' : 'block';
             if(isVisible) nextCard(); 
         }
-
         function renderVocabList() {
             const container = document.getElementById('vocab-list-container');
-            container.innerHTML = '';
-            vocabulary.forEach((item, index) => {
-                container.innerHTML += `
-                    <div class="vocab-list-item" style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
-                        <span><b>${item.kanji}</b></span>
-                        <button onclick="removeVocab(${index})" style="color:red; border:none; background:none;">✕</button>
-                    </div>
-                `;
-            });
+            container.innerHTML = vocabulary.map((item, index) => `
+                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+                    <span><b>${item.kanji}</b></span>
+                    <button onclick="removeVocab(${index})" style="color:red; border:none; background:none;">✕</button>
+                </div>
+            `).join('');
         }
-
         function addVocab() {
             const k = document.getElementById('new-word').value.trim();
             const p = document.getElementById('new-pinyin').value.trim();
             const m = document.getElementById('new-meaning').value.trim();
-            if(k) {
-                vocabulary.push({kanji: k, pinyin: p, meaning: m});
-                saveToLocal();
-                document.querySelectorAll('.input-group input').forEach(i => i.value = '');
-            }
+            if(k) { vocabulary.push({kanji: k, pinyin: p, meaning: m}); saveToLocal(); document.querySelectorAll('.input-group input').forEach(i => i.value = ''); }
         }
-
-        function removeVocab(index) {
-            vocabulary.splice(index, 1);
-            saveToLocal();
-        }
-
+        function removeVocab(index) { vocabulary.splice(index, 1); saveToLocal(); }
         function exportVocab() {
-            const dataStr = JSON.stringify(vocabulary, null, 2);
-            const blob = new Blob([dataStr], {type: "application/json"});
-            const url = URL.createObjectURL(blob);
+            const blob = new Blob([JSON.stringify(vocabulary, null, 2)], {type: "application/json"});
             const link = document.createElement('a');
-            link.href = url;
+            link.href = URL.createObjectURL(blob);
             link.download = `vocab_export.json`;
             link.click();
         }
-
         function importVocab(event) {
             const file = event.target.files[0];
             if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = (e) => {
                 try {
-                    const importedData = JSON.parse(e.target.result);
-                    if (Array.isArray(importedData)) {
-                        vocabulary = importedData;
-                        saveToLocal();
-                        alert("匯入成功！");
-                    }
-                } catch (err) { alert("檔案格式錯誤"); }
+                    const data = JSON.parse(e.target.result);
+                    if (Array.isArray(data)) { vocabulary = data; saveToLocal(); alert("匯入成功！"); }
+                } catch (err) { alert("格式錯誤"); }
             };
             reader.readAsText(file);
         }
 
-        // --- 字體調整邏輯 ---
         const fontSlider = document.getElementById('fontSlider');
         function updateFontSize() {
             const size = fontSlider.value;
-            const wordEl = document.getElementById('word-display');
-            const pinyinEl = document.getElementById('pinyin-display');
-            const meaningEl = document.getElementById('meaning-display');
-
-            wordEl.style.fontSize = size + "px";
-            // 拼音和意義會跟著縮放，但設有上限避免背面過擠
-            pinyinEl.style.fontSize = Math.min(size * 0.5, 60) + "px";
-            meaningEl.style.fontSize = Math.min(size * 0.4, 45) + "px";
+            document.getElementById('word-display').style.fontSize = size + "px";
+            document.getElementById('pinyin-display').style.fontSize = Math.min(size * 0.5, 60) + "px";
+            document.getElementById('meaning-display').style.fontSize = Math.min(size * 0.4, 45) + "px";
         }
-
         fontSlider.addEventListener('input', updateFontSize);
 
-        window.onload = () => {
-            renderVocabList();
-            updateFontSize();
-            nextCard();
-        };
+        window.onload = () => { renderVocabList(); updateFontSize(); nextCard(); };
     </script>
 </body>
 </html>
