@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>中文閃卡 - 彈性自定義版</title>
+    <title>中文閃卡 - 支援匯出入版</title>
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -37,7 +37,7 @@
 
         .settings-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
 
-        /* 編輯彈窗 */
+        /* 彈窗樣式 */
         #settings-modal {
             display: none;
             position: fixed;
@@ -91,16 +91,27 @@
 
         .delete-btn { color: #e74c3c; cursor: pointer; border: none; background: none; font-weight: bold; }
 
-        /* 閃卡樣式 */
-        .main-container {
-            flex: 1;
+        /* 匯出入區塊 */
+        .backup-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
+            gap: 10px;
         }
 
+        .backup-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 13px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background: #f9f9f9;
+            cursor: pointer;
+        }
+
+        /* 閃卡與原本樣式 */
+        .main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
         .slider-container { margin: 15px; display: flex; align-items: center; gap: 10px; }
         .card-container { perspective: 1000px; width: 85%; max-width: 450px; height: 300px; cursor: pointer; }
         .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
@@ -109,9 +120,9 @@
         .card-front { background: var(--card-white); }
         .card-back { background: var(--card-back); transform: rotateY(180deg); border: 2px dashed var(--secondary-color); }
 
-        #word-display { font-weight: 700; color: #2c3e50; line-height: 1.2; }
-        #pinyin-display { color: var(--secondary-color); margin-bottom: 8px; font-style: italic; }
-        #meaning-display { color: #7f8c8d; line-height: 1.4; }
+        #word-display { font-weight: 700; color: #2c3e50; }
+        #pinyin-display { color: var(--secondary-color); margin-bottom: 8px; }
+        #meaning-display { color: #7f8c8d; }
 
         .btn-group { margin: 30px 0; }
         .btn { padding: 15px 50px; font-size: 1.2rem; background-color: var(--primary-color); color: white; border: none; border-radius: 50px; font-weight: bold; }
@@ -121,7 +132,7 @@
 <body>
 
     <div class="header">
-        <div style="font-weight: bold; font-size: 1.1rem;">中文閃卡 Pro</div>
+        <div style="font-weight: bold;">中文閃卡 Pro</div>
         <button class="settings-btn" onclick="toggleModal()">⚙️</button>
     </div>
 
@@ -152,26 +163,27 @@
     <div id="settings-modal">
         <div class="modal-content">
             <h3 style="margin-top:0;">編輯清單</h3>
-            <p style="font-size: 12px; color: #666;">* 僅「中文字」為必填</p>
             <div class="input-group">
                 <input type="text" id="new-word" placeholder="中文字 (必填)">
                 <input type="text" id="new-pinyin" placeholder="拼音 (選填)">
                 <input type="text" id="new-meaning" placeholder="意義 (選填)">
-                <button class="add-btn" onclick="addVocab()">新增到清單</button>
+                <button class="add-btn" onclick="addVocab()">新增單字</button>
             </div>
-            <div id="vocab-list-container" style="max-height: 250px; overflow-y: auto; border-top: 1px solid #eee;">
-                </div>
-            <button class="close-modal-btn" onclick="toggleModal()">完成並儲存</button>
-            <button onclick="resetDefault()" style="width:100%; margin-top:10px; background:none; border:none; color:#999; font-size: 11px; text-decoration: underline;">恢復預設範例</button>
+            
+            <div id="vocab-list-container" style="max-height: 200px; overflow-y: auto; border-top: 1px solid #eee;"></div>
+
+            <div class="backup-section">
+                <button class="backup-btn" onclick="exportVocab()">📤 匯出備份 (JSON)</button>
+                <button class="backup-btn" onclick="document.getElementById('importFile').click()">📥 匯入清單</button>
+                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importVocab(event)">
+            </div>
+
+            <button class="close-modal-btn" onclick="toggleModal()">關閉設定</button>
         </div>
     </div>
 
     <script>
-        const defaultVocab = [
-            {kanji: "學習", pinyin: "xué xí", meaning: "To learn"},
-            {kanji: "謝謝", pinyin: "", meaning: "Thanks (無拼音範例)"}
-        ];
-
+        const defaultVocab = [{kanji: "歡迎", pinyin: "huān yíng", meaning: "Welcome"}];
         let vocabulary = JSON.parse(localStorage.getItem('myVocab')) || defaultVocab;
         let currentIndex = -1;
         const synth = window.speechSynthesis;
@@ -201,30 +213,12 @@
                 return;
             }
             document.getElementById('card').classList.remove('is-flipped');
-            
             setTimeout(() => {
-                let nextIndex;
-                if (vocabulary.length > 1) {
-                    do { nextIndex = Math.floor(Math.random() * vocabulary.length); } while (nextIndex === currentIndex);
-                } else {
-                    nextIndex = 0;
-                }
-                
-                currentIndex = nextIndex;
+                currentIndex = Math.floor(Math.random() * vocabulary.length);
                 const item = vocabulary[currentIndex];
-                
                 document.getElementById('word-display').innerText = item.kanji;
-                
-                // 處理拼音顯示邏輯
-                const pyEl = document.getElementById('pinyin-display');
-                pyEl.innerText = item.pinyin || "";
-                pyEl.style.display = item.pinyin ? "block" : "none";
-
-                // 處理意義顯示邏輯
-                const meEl = document.getElementById('meaning-display');
-                meEl.innerText = item.meaning || "";
-                meEl.style.display = item.meaning ? "block" : "none";
-
+                document.getElementById('pinyin-display').innerText = item.pinyin || "";
+                document.getElementById('meaning-display').innerText = item.meaning || "";
                 speak(item.kanji);
             }, 200);
         }
@@ -242,7 +236,7 @@
             vocabulary.forEach((item, index) => {
                 container.innerHTML += `
                     <div class="vocab-list-item">
-                        <span style="font-size:14px;"><b>${item.kanji}</b> ${item.pinyin ? '<small>('+item.pinyin+')</small>' : ''}</span>
+                        <span><b>${item.kanji}</b></span>
                         <button class="delete-btn" onclick="removeVocab(${index})">✕</button>
                     </div>
                 `;
@@ -253,16 +247,10 @@
             const k = document.getElementById('new-word').value.trim();
             const p = document.getElementById('new-pinyin').value.trim();
             const m = document.getElementById('new-meaning').value.trim();
-            
-            if(k) { // 只要有中文字就允許新增
+            if(k) {
                 vocabulary.push({kanji: k, pinyin: p, meaning: m});
                 saveToLocal();
-                document.getElementById('new-word').value = '';
-                document.getElementById('new-pinyin').value = '';
-                document.getElementById('new-meaning').value = '';
-                document.getElementById('new-word').focus();
-            } else {
-                alert("請至少輸入中文字！");
+                document.querySelectorAll('.input-group input').forEach(i => i.value = '');
             }
         }
 
@@ -271,25 +259,50 @@
             saveToLocal();
         }
 
-        function resetDefault() {
-            if(confirm("確定要恢復預設範例嗎？這會清除你目前的清單。")) {
-                vocabulary = [...defaultVocab];
-                saveToLocal();
-            }
+        // --- 匯出功能 ---
+        function exportVocab() {
+            const dataStr = JSON.stringify(vocabulary, null, 2);
+            const blob = new Blob([dataStr], {type: "application/json"});
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `vocab_backup_${new Date().toLocaleDateString()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // --- 匯入功能 ---
+        function importVocab(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedData = JSON.parse(e.target.result);
+                    if (Array.isArray(importedData)) {
+                        if(confirm(`偵測到 ${importedData.length} 個單字，是否要覆蓋目前的清單？`)) {
+                            vocabulary = importedData;
+                            saveToLocal();
+                            alert("匯入成功！");
+                        }
+                    } else {
+                        alert("格式錯誤，請確保檔案是正確的 JSON 格式。");
+                    }
+                } catch (err) {
+                    alert("讀取失敗：" + err);
+                }
+            };
+            reader.readAsText(file);
         }
 
         const fontSlider = document.getElementById('fontSlider');
         fontSlider.addEventListener('input', (e) => {
             const size = e.target.value;
             document.getElementById('word-display').style.fontSize = size + "px";
-            document.getElementById('pinyin-display').style.fontSize = (size * 0.45) + "px";
-            document.getElementById('meaning-display').style.fontSize = (size * 0.4) + "px";
         });
 
         window.onload = () => {
             renderVocabList();
-            const initialSize = fontSlider.value;
-            document.getElementById('word-display').style.fontSize = initialSize + "px";
             nextCard();
         };
     </script>
