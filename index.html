@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>中文閃卡 - 支援匯出入版</title>
+    <title>中文閃卡 - 超大字體增強版</title>
     <style>
         :root {
             --primary-color: #4CAF50;
@@ -33,6 +33,7 @@
             box-sizing: border-box;
             background: white;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
 
         .settings-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
@@ -65,7 +66,7 @@
         }
 
         .input-group input {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #ddd;
             border-radius: 8px;
             font-size: 16px;
@@ -75,72 +76,125 @@
             background: var(--primary-color);
             color: white;
             border: none;
-            padding: 10px;
+            padding: 12px;
             border-radius: 8px;
             font-weight: bold;
             cursor: pointer;
         }
 
-        .vocab-list-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 5px;
-            border-bottom: 1px solid #eee;
-            align-items: center;
-        }
-
-        .delete-btn { color: #e74c3c; cursor: pointer; border: none; background: none; font-weight: bold; }
-
-        /* 匯出入區塊 */
-        .backup-section {
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 2px solid #eee;
-            display: flex;
-            gap: 10px;
-        }
-
-        .backup-btn {
+        /* 閃卡主區域 */
+        .main-container {
             flex: 1;
-            padding: 8px;
-            font-size: 13px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        /* 控制字體大小的滑桿區 */
+        .slider-container {
+            width: 90%;
+            max-width: 400px;
+            margin: 10px 0 20px 0;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        input[type=range] { flex: 1; }
+
+        .card-container {
+            perspective: 1000px;
+            width: 95%;
+            max-width: 600px;
+            height: 60vh; /* 使用比例高度，確保大字有空間 */
+            max-height: 500px;
             cursor: pointer;
         }
 
-        /* 閃卡與原本樣式 */
-        .main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; }
-        .slider-container { margin: 15px; display: flex; align-items: center; gap: 10px; }
-        .card-container { perspective: 1000px; width: 85%; max-width: 450px; height: 300px; cursor: pointer; }
-        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); }
+        .card {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
         .card.is-flipped { transform: rotateY(180deg); }
-        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 20px; padding: 25px; box-sizing: border-box; text-align: center; }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 25px;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            overflow: hidden; /* 防止文字溢出 */
+            word-break: break-all; /* 強制換行 */
+        }
+
         .card-front { background: var(--card-white); }
-        .card-back { background: var(--card-back); transform: rotateY(180deg); border: 2px dashed var(--secondary-color); }
+        .card-back {
+            background: var(--card-back);
+            transform: rotateY(180deg);
+            border: 3px dashed var(--secondary-color);
+        }
 
-        #word-display { font-weight: 700; color: #2c3e50; }
-        #pinyin-display { color: var(--secondary-color); margin-bottom: 8px; }
-        #meaning-display { color: #7f8c8d; }
+        /* 文字動態調整 */
+        #word-display {
+            font-weight: 900;
+            color: #2c3e50;
+            width: 100%;
+        }
 
-        .btn-group { margin: 30px 0; }
-        .btn { padding: 15px 50px; font-size: 1.2rem; background-color: var(--primary-color); color: white; border: none; border-radius: 50px; font-weight: bold; }
-        .close-modal-btn { background: #34495e; width: 100%; padding: 12px; margin-top: 15px; border-radius: 8px; color: white; border: none; font-size: 16px; }
+        #pinyin-display { color: var(--secondary-color); font-weight: bold; }
+        #meaning-display { color: #7f8c8d; margin-top: 10px; }
+
+        .btn-group { margin: 25px 0; }
+        .btn {
+            padding: 18px 60px;
+            font-size: 1.4rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 60px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+        }
+        
+        .btn:active { transform: scale(0.95); }
+
+        .backup-section { margin-top: 20px; display: flex; gap: 10px; border-top: 1px solid #eee; padding-top: 15px; }
+        .backup-btn { flex: 1; padding: 10px; font-size: 12px; cursor: pointer; border-radius: 5px; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-weight: bold;">中文閃卡 Pro</div>
+        <div style="font-weight: bold; font-size: 1.2rem;">中文閃卡 Pro</div>
         <button class="settings-btn" onclick="toggleModal()">⚙️</button>
     </div>
 
     <div class="main-container">
         <div class="slider-container">
-            <span style="font-size: 12px;">小</span>
-            <input type="range" min="30" max="120" value="70" id="fontSlider">
-            <span style="font-size: 12px;">大</span>
+            <span>A</span>
+            <input type="range" min="30" max="250" value="100" id="fontSlider">
+            <span style="font-size: 24px; font-weight: bold;">A</span>
         </div>
 
         <div class="card-container" onclick="flipCard()">
@@ -173,17 +227,17 @@
             <div id="vocab-list-container" style="max-height: 200px; overflow-y: auto; border-top: 1px solid #eee;"></div>
 
             <div class="backup-section">
-                <button class="backup-btn" onclick="exportVocab()">📤 匯出備份 (JSON)</button>
+                <button class="backup-btn" onclick="exportVocab()">📤 匯出備份</button>
                 <button class="backup-btn" onclick="document.getElementById('importFile').click()">📥 匯入清單</button>
                 <input type="file" id="importFile" style="display:none" accept=".json" onchange="importVocab(event)">
             </div>
 
-            <button class="close-modal-btn" onclick="toggleModal()">關閉設定</button>
+            <button onclick="toggleModal()" style="width:100%; margin-top:20px; padding:12px; background:#34495e; color:white; border:none; border-radius:10px;">完成並關閉</button>
         </div>
     </div>
 
     <script>
-        const defaultVocab = [{kanji: "歡迎", pinyin: "huān yíng", meaning: "Welcome"}];
+        const defaultVocab = [{kanji: "大家", pinyin: "dà jiā", meaning: "Everyone"}];
         let vocabulary = JSON.parse(localStorage.getItem('myVocab')) || defaultVocab;
         let currentIndex = -1;
         const synth = window.speechSynthesis;
@@ -197,7 +251,7 @@
             synth.cancel();
             const utter = new SpeechSynthesisUtterance(text);
             utter.lang = 'zh-TW';
-            utter.rate = 0.9;
+            utter.rate = 0.85; // 稍微慢一點更清晰
             synth.speak(utter);
         }
 
@@ -235,9 +289,9 @@
             container.innerHTML = '';
             vocabulary.forEach((item, index) => {
                 container.innerHTML += `
-                    <div class="vocab-list-item">
+                    <div class="vocab-list-item" style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
                         <span><b>${item.kanji}</b></span>
-                        <button class="delete-btn" onclick="removeVocab(${index})">✕</button>
+                        <button onclick="removeVocab(${index})" style="color:red; border:none; background:none;">✕</button>
                     </div>
                 `;
             });
@@ -259,19 +313,16 @@
             saveToLocal();
         }
 
-        // --- 匯出功能 ---
         function exportVocab() {
             const dataStr = JSON.stringify(vocabulary, null, 2);
             const blob = new Blob([dataStr], {type: "application/json"});
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `vocab_backup_${new Date().toLocaleDateString()}.json`;
+            link.download = `vocab_export.json`;
             link.click();
-            URL.revokeObjectURL(url);
         }
 
-        // --- 匯入功能 ---
         function importVocab(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -280,29 +331,34 @@
                 try {
                     const importedData = JSON.parse(e.target.result);
                     if (Array.isArray(importedData)) {
-                        if(confirm(`偵測到 ${importedData.length} 個單字，是否要覆蓋目前的清單？`)) {
-                            vocabulary = importedData;
-                            saveToLocal();
-                            alert("匯入成功！");
-                        }
-                    } else {
-                        alert("格式錯誤，請確保檔案是正確的 JSON 格式。");
+                        vocabulary = importedData;
+                        saveToLocal();
+                        alert("匯入成功！");
                     }
-                } catch (err) {
-                    alert("讀取失敗：" + err);
-                }
+                } catch (err) { alert("檔案格式錯誤"); }
             };
             reader.readAsText(file);
         }
 
+        // --- 字體調整邏輯 ---
         const fontSlider = document.getElementById('fontSlider');
-        fontSlider.addEventListener('input', (e) => {
-            const size = e.target.value;
-            document.getElementById('word-display').style.fontSize = size + "px";
-        });
+        function updateFontSize() {
+            const size = fontSlider.value;
+            const wordEl = document.getElementById('word-display');
+            const pinyinEl = document.getElementById('pinyin-display');
+            const meaningEl = document.getElementById('meaning-display');
+
+            wordEl.style.fontSize = size + "px";
+            // 拼音和意義會跟著縮放，但設有上限避免背面過擠
+            pinyinEl.style.fontSize = Math.min(size * 0.5, 60) + "px";
+            meaningEl.style.fontSize = Math.min(size * 0.4, 45) + "px";
+        }
+
+        fontSlider.addEventListener('input', updateFontSize);
 
         window.onload = () => {
             renderVocabList();
+            updateFontSize();
             nextCard();
         };
     </script>
