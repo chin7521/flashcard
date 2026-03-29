@@ -5,178 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>中文閃卡</title>
     <style>
-        :root {
-            --primary-color: #4CAF50;
-            --secondary-color: #f39c12;
-            --bg-color: #f0f2f5;
-            --card-white: #ffffff;
-            --card-back: #fffdf0;
-        }
-
-        body {
-            font-family: "PingFang TC", "Microsoft JhengHei", sans-serif;
-            background-color: var(--bg-color);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* 頂部導覽列 */
-        .header {
-            width: 100%;
-            padding: 10px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-sizing: border-box;
-            background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            z-index: 10;
-        }
-
-        .header-btns {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 5px;
-            transition: transform 0.1s;
-        }
-        .icon-btn:active { transform: scale(0.9); }
-
-        /* 主區域 */
-        .main-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box;
-        }
-
-        .slider-container {
-            width: 90%;
-            max-width: 400px;
-            margin: 10px 0 20px 0;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            background: white;
-            padding: 10px 20px;
-            border-radius: 30px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-
-        .card-container {
-            perspective: 1000px;
-            width: 95%;
-            max-width: 600px;
-            height: 55vh;
-            max-height: 500px;
-            cursor: pointer;
-        }
-
-        .card {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            border-radius: 25px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
-        }
-
+        :root { --primary-color: #4CAF50; --secondary-color: #f39c12; --bg-color: #f0f2f5; --card-white: #ffffff; --card-back: #fffdf0; }
+        body { font-family: "PingFang TC", "Microsoft JhengHei", sans-serif; background-color: var(--bg-color); margin: 0; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; }
+        .header { width: 100%; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; box-sizing: border-box; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 10; }
+        .header-btns { display: flex; gap: 15px; align-items: center; }
+        .icon-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+        .main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; padding: 10px; box-sizing: border-box; }
+        .slider-container { width: 90%; max-width: 400px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; background: white; padding: 10px 20px; border-radius: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .card-container { perspective: 1000px; width: 95%; max-width: 600px; height: 50vh; max-height: 500px; cursor: pointer; }
+        .card { width: 100%; height: 100%; position: relative; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1); transform-style: preserve-3d; border-radius: 25px; box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
         .card.is-flipped { transform: rotateY(180deg); }
-
-        .card-face {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-radius: 25px;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-            overflow: hidden;
-            word-break: break-all;
-        }
-
+        .card-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 25px; padding: 20px; box-sizing: border-box; text-align: center; word-break: break-all; }
         .card-front { background: var(--card-white); }
-        .card-back {
-            background: var(--card-back);
-            transform: rotateY(180deg);
-            border: 3px dashed var(--secondary-color);
-        }
-
+        .card-back { background: var(--card-back); transform: rotateY(180deg); border: 3px dashed var(--secondary-color); }
         #word-display { font-weight: 900; color: #2c3e50; }
         #pinyin-display { color: var(--secondary-color); font-weight: bold; }
         #meaning-display { color: #7f8c8d; margin-top: 10px; }
-
-        /* 手動朗讀圖示 */
-        .manual-speak {
-            position: absolute;
-            bottom: 20px;
-            font-size: 20px;
-            color: #ddd;
-        }
-
         .btn-group { margin: 25px 0; }
-        .btn {
-            padding: 18px 60px;
-            font-size: 1.4rem;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 60px;
-            font-weight: bold;
-            box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
-        }
-
+        .btn { padding: 18px 60px; font-size: 1.4rem; background-color: var(--primary-color); color: white; border: none; border-radius: 60px; font-weight: bold; }
+        
         /* 設定彈窗 */
-        #settings-modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            max-width: 500px;
-            margin: auto;
-        }
-
+        #settings-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; padding: 20px; box-sizing: border-box; }
+        .modal-content { background: white; padding: 20px; border-radius: 15px; max-width: 500px; margin: auto; }
         .input-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .input-group input { padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; }
-        .add-btn { background: var(--primary-color); color: white; border: none; padding: 12px; border-radius: 8px; font-weight: bold; }
+        .input-group input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
+        
+        /* 匯入區塊 */
+        .backup-section { margin-top: 20px; padding-top: 15px; border-top: 2px solid #eee; }
+        .url-select { width: 100%; padding: 10px; margin-bottom: 8px; border-radius: 8px; border: 1px solid #4CAF50; background: #f9fff9; font-size: 14px; }
+        .backup-btn { flex: 1; padding: 8px; font-size: 12px; cursor: pointer; border-radius: 5px; border: 1px solid #ccc; background: #fff; }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="font-weight: bold; font-size: 1.2rem;">中文閃卡 Pro</div>
+        <div style="font-weight: bold;">中文閃卡 Pro</div>
         <div class="header-btns">
-            <button id="voice-toggle" class="icon-btn" onclick="toggleVoice()" title="切換發音">🔊</button>
+            <button id="voice-toggle" class="icon-btn" onclick="toggleVoice()">🔊</button>
             <button class="icon-btn" onclick="toggleModal()">⚙️</button>
         </div>
     </div>
@@ -185,81 +50,116 @@
         <div class="slider-container">
             <span>A</span>
             <input type="range" min="30" max="250" value="100" id="fontSlider">
-            <span style="font-size: 24px; font-weight: bold;">A</span>
+            <span style="font-size: 24px;">A</span>
         </div>
-
         <div class="card-container" onclick="flipCard()">
             <div class="card" id="card">
-                <div class="card-face card-front">
-                    <div id="word-display">載入中...</div>
-                    <div class="manual-speak">🔊</div>
-                </div>
+                <div class="card-face card-front"><div id="word-display">載入中...</div></div>
                 <div class="card-face card-back">
                     <div id="pinyin-display"></div>
                     <div id="meaning-display"></div>
-                    <div class="manual-speak">🔊</div>
                 </div>
             </div>
         </div>
-
-        <div class="btn-group">
-            <button class="btn" onclick="nextCard(event)">下一張</button>
-        </div>
+        <div class="btn-group"><button class="btn" onclick="nextCard(event)">下一張</button></div>
     </div>
 
     <div id="settings-modal">
         <div class="modal-content">
-            <h3 style="margin-top:0;">編輯清單</h3>
+            <h3 style="margin-top:0;">單字管理與匯入</h3>
+            
             <div class="input-group">
-                <input type="text" id="new-word" placeholder="中文字 (必填)">
-                <input type="text" id="new-pinyin" placeholder="拼音 (選填)">
-                <input type="text" id="new-meaning" placeholder="意義 (選填)">
-                <button class="add-btn" onclick="addVocab()">新增單字</button>
+                <input type="text" id="new-word" placeholder="中文字">
+                <input type="text" id="new-pinyin" placeholder="拼音">
+                <input type="text" id="new-meaning" placeholder="意義">
+                <button onclick="addVocab()" style="background:var(--primary-color); color:white; padding:10px; border:none; border-radius:8px; font-weight:bold;">手動新增</button>
             </div>
-            <div id="vocab-list-container" style="max-height: 200px; overflow-y: auto; border-top: 1px solid #eee;"></div>
-            <div style="margin-top: 20px; display: flex; gap: 10px;">
-                <button onclick="exportVocab()" style="flex:1; padding:10px; font-size:12px;">📤 匯出備份</button>
-                <button onclick="document.getElementById('importFile').click()" style="flex:1; padding:10px; font-size:12px;">📥 匯入清單</button>
-                <input type="file" id="importFile" style="display:none" accept=".json" onchange="importVocab(event)">
+            
+            <div id="vocab-list-container" style="max-height: 120px; overflow-y: auto; border: 1px solid #eee; padding: 5px; margin-bottom: 10px;"></div>
+
+            <div class="backup-section">
+                <p style="font-size: 13px; margin: 0 0 8px 0; color: #333; font-weight: bold;">🔗 從網址匯入 (JSON)</p>
+                
+                <select id="preset-urls" class="url-select" onchange="updateUrlInput()">
+                    <option value="">-- 選擇預設單字清單 --</option>
+                    <option value="https://raw.githubusercontent.com/chin7521/flashcard/refs/heads/main/vocab_Vol1.json">Vol1</option>
+                    <option value="https://raw.githubusercontent.com/chin7521/flashcard/refs/heads/main/vocab_Vol2_L1-L6.json">Vol L1-L6</option>
+                    <option value="https://raw.githubusercontent.com/chin7521/flashcard/refs/heads/main/vocab_Vol2_L7-L12.json">Vol2 L7-L12</option>
+                </select>
+
+                <div style="display: flex; gap: 5px; margin-bottom: 15px;">
+                    <input type="text" id="remote-url" placeholder="或貼上 JSON 網址" style="flex:1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px;">
+                    <button onclick="importFromURL()" style="background:#24292e; color:white; border:none; padding:5px 15px; border-radius:8px; font-size: 13px; font-weight: bold;">讀取</button>
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button class="backup-btn" onclick="exportVocab()">📤 匯出備份</button>
+                    <button class="backup-btn" onclick="document.getElementById('importFile').click()">📥 本地匯入</button>
+                    <input type="file" id="importFile" style="display:none" accept=".json" onchange="importVocab(event)">
+                </div>
             </div>
-            <button onclick="toggleModal()" style="width:100%; margin-top:20px; padding:12px; background:#34495e; color:white; border:none; border-radius:10px;">完成並關閉</button>
+
+            <button onclick="toggleModal()" style="width:100%; margin-top:20px; padding:12px; background:#34495e; color:white; border:none; border-radius:10px; font-weight:bold;">完成並關閉</button>
         </div>
     </div>
 
     <script>
-        const defaultVocab = [{kanji: "靜音", pinyin: "jìng yīn", meaning: "Mute / Silent"}];
-        let vocabulary = JSON.parse(localStorage.getItem('myVocab')) || defaultVocab;
+        let vocabulary = JSON.parse(localStorage.getItem('myVocab')) || [{kanji: "歡迎", pinyin: "huān yíng", meaning: "Welcome"}];
         let currentIndex = -1;
-        let isVoiceEnabled = localStorage.getItem('voiceEnabled') !== 'false'; // 預設開啟
+        let isVoiceEnabled = localStorage.getItem('voiceEnabled') !== 'false';
         const synth = window.speechSynthesis;
 
-        // 初始化開關圖示
-        document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "靜音模式 🔇";
+        // 初始化語音按鈕
+        document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "🔇";
 
-        function toggleVoice() {
-            isVoiceEnabled = !isVoiceEnabled;
-            localStorage.setItem('voiceEnabled', isVoiceEnabled);
-            document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "靜音模式 🔇";
-            // 切換時如果剛好有聲音，直接停止
-            if (!isVoiceEnabled) synth.cancel();
+        function saveToLocal() { 
+            localStorage.setItem('myVocab', JSON.stringify(vocabulary)); 
+            renderVocabList(); 
         }
 
-        function speak(text, force = false) {
-            // 如果沒開啟語音且不是「強制點擊發音」，則不執行
-            if (!isVoiceEnabled && !force) return;
-            
-            synth.cancel();
-            const utter = new SpeechSynthesisUtterance(text);
-            utter.lang = 'zh-TW';
-            utter.rate = 0.85;
-            synth.speak(utter);
+        // 當下拉選單改變時，更新輸入框內容
+        function updateUrlInput() {
+            const select = document.getElementById('preset-urls');
+            const input = document.getElementById('remote-url');
+            if (select.value) {
+                input.value = select.value;
+            }
         }
 
-        function flipCard() {
-            document.getElementById('card').classList.toggle('is-flipped');
-            if (currentIndex >= 0) speak(vocabulary[currentIndex].kanji);
+        // 從網址讀取 JSON
+        async function importFromURL() {
+            let url = document.getElementById('remote-url').value.trim();
+            if (!url) return alert("請選擇或輸入網址");
+
+            // 自動轉換 GitHub 一般連結為 Raw 連結
+            if (url.includes("github.com") && !url.includes("raw.githubusercontent.com")) {
+                url = url.replace("github.com", "raw.githubusercontent.com").replace("/blob/", "/");
+            }
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("讀取失敗，請檢查網址是否正確。");
+                const data = await response.json();
+                if (Array.isArray(data)) {
+                    if (confirm(`成功找到 ${data.length} 個單字，是否覆蓋現有清單？`)) {
+                        vocabulary = data;
+                        saveToLocal();
+                        alert("匯入成功！");
+                        toggleModal();
+                    }
+                } else {
+                    alert("JSON 格式不正確，應為陣列格式。");
+                }
+            } catch (err) {
+                alert("讀取出錯：" + err.message);
+            }
         }
 
+        // --- 核心閃卡邏輯 ---
+        function speak(text) { if (!isVoiceEnabled) return; synth.cancel(); const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-TW'; u.rate = 0.85; synth.speak(u); }
+        function toggleVoice() { isVoiceEnabled = !isVoiceEnabled; localStorage.setItem('voiceEnabled', isVoiceEnabled); document.getElementById('voice-toggle').innerText = isVoiceEnabled ? "🔊" : "🔇"; }
+        function flipCard() { document.getElementById('card').classList.toggle('is-flipped'); if(currentIndex>=0) speak(vocabulary[currentIndex].kanji); }
+        
         function nextCard(event) {
             if(event) event.stopPropagation();
             if(vocabulary.length === 0) return;
@@ -274,60 +174,60 @@
             }, 200);
         }
 
-        // --- 以下為管理功能邏輯 (同前版) ---
-        function saveToLocal() { localStorage.setItem('myVocab', JSON.stringify(vocabulary)); renderVocabList(); }
-        function toggleModal() {
-            const modal = document.getElementById('settings-modal');
-            const isVisible = modal.style.display === 'block';
-            modal.style.display = isVisible ? 'none' : 'block';
+        function toggleModal() { 
+            const m = document.getElementById('settings-modal'); 
+            const isVisible = m.style.display === 'block';
+            m.style.display = isVisible ? 'none' : 'block'; 
             if(isVisible) nextCard(); 
         }
+
         function renderVocabList() {
-            const container = document.getElementById('vocab-list-container');
-            container.innerHTML = vocabulary.map((item, index) => `
-                <div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;">
+            document.getElementById('vocab-list-container').innerHTML = vocabulary.map((item, i) => `
+                <div style="display:flex; justify-content:space-between; font-size:13px; padding:6px; border-bottom:1px solid #eee;">
                     <span><b>${item.kanji}</b></span>
-                    <button onclick="removeVocab(${index})" style="color:red; border:none; background:none;">✕</button>
+                    <button onclick="removeVocab(${i})" style="color:red; border:none; background:none; cursor:pointer;">✕</button>
                 </div>
             `).join('');
         }
+
         function addVocab() {
             const k = document.getElementById('new-word').value.trim();
-            const p = document.getElementById('new-pinyin').value.trim();
-            const m = document.getElementById('new-meaning').value.trim();
-            if(k) { vocabulary.push({kanji: k, pinyin: p, meaning: m}); saveToLocal(); document.querySelectorAll('.input-group input').forEach(i => i.value = ''); }
-        }
-        function removeVocab(index) { vocabulary.splice(index, 1); saveToLocal(); }
-        function exportVocab() {
-            const blob = new Blob([JSON.stringify(vocabulary, null, 2)], {type: "application/json"});
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `vocab_export.json`;
-            link.click();
-        }
-        function importVocab(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const data = JSON.parse(e.target.result);
-                    if (Array.isArray(data)) { vocabulary = data; saveToLocal(); alert("匯入成功！"); }
-                } catch (err) { alert("格式錯誤"); }
-            };
-            reader.readAsText(file);
+            if(k){
+                vocabulary.push({
+                    kanji: k, 
+                    pinyin: document.getElementById('new-pinyin').value.trim(), 
+                    meaning: document.getElementById('new-meaning').value.trim()
+                });
+                saveToLocal();
+                document.getElementById('new-word').value = '';
+                document.getElementById('new-pinyin').value = '';
+                document.getElementById('new-meaning').value = '';
+            }
         }
 
-        const fontSlider = document.getElementById('fontSlider');
-        function updateFontSize() {
-            const size = fontSlider.value;
-            document.getElementById('word-display').style.fontSize = size + "px";
-            document.getElementById('pinyin-display').style.fontSize = Math.min(size * 0.5, 60) + "px";
-            document.getElementById('meaning-display').style.fontSize = Math.min(size * 0.4, 45) + "px";
+        function removeVocab(i) { vocabulary.splice(i,1); saveToLocal(); }
+        function exportVocab() { 
+            const b = new Blob([JSON.stringify(vocabulary, null, 2)], {type:"application/json"}); 
+            const a = document.createElement('a'); 
+            a.href = URL.createObjectURL(b); a.download="my_vocab.json"; a.click(); 
         }
-        fontSlider.addEventListener('input', updateFontSize);
+        function importVocab(e) { 
+            const f = e.target.files[0]; 
+            const r = new FileReader(); 
+            r.onload=(ev)=>{ vocabulary=JSON.parse(ev.target.result); saveToLocal(); nextCard(); }; 
+            r.readAsText(f); 
+        }
 
-        window.onload = () => { renderVocabList(); updateFontSize(); nextCard(); };
+        const fS = document.getElementById('fontSlider');
+        function updateFS() { 
+            const s = fS.value; 
+            document.getElementById('word-display').style.fontSize = s+"px"; 
+            document.getElementById('pinyin-display').style.fontSize = Math.min(s * 0.5, 60) + "px";
+            document.getElementById('meaning-display').style.fontSize = Math.min(s * 0.4, 45) + "px";
+        }
+        fS.addEventListener('input', updateFS);
+
+        window.onload = () => { renderVocabList(); updateFS(); nextCard(); };
     </script>
 </body>
 </html>
